@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <script src="https://cdn.socket.io/socket.io-1.1.0.js"></script>
+    <script>
+        (function() {
+            var socket = io.connect('http://localhost:7777');
+            socket.on('connect', function() {
+                console.log("connected...");
+
+                socket.emit('addme', prompt('Who are you?'));
+            });
+
+            socket.on('chat', function(username, data) {
+                console.log("chat", username, data);
+
+                var p = document.createElement('p');
+                p.innerHTML = "<b>"+username+": </b>"+data;
+                document.getElementById('output').appendChild(p);
+            });
+
+            window.onSendFormSubmit = function() {
+                var text = document.getElementById('input').value;
+                socket.emit('sendchat', text);
+                document.getElementById('input').value = "";
+                return false;
+            }
+
+            window.addEventListener('load', function() {
+                document.getElementById('send').addEventListener('submit', window.onSendFormSubmit, false);
+            }, false);
+        })();
+    </script>
+    <title>Chatik</title>
+</head>
+<body>
+    <div id="output"></div>
+    <div >
+        <form id="send" onsubmit="return false">
+            <!--<input type="text" id="input"/>-->
+            <textarea id="input" onkeypress="(function(e){
+                if (13 === e.keyCode && false === e.shiftKey) {
+                    // submit by Enter
+                    window.onSendFormSubmit();
+                    //document.getElementById('send').submit();
+                }
+            })(event);"></textarea>
+            <input type="submit" value="Send" />
+        </form>
+    </div>
+</body>
+</html>
