@@ -1,6 +1,10 @@
+var fs = require('fs');
 
-
-var app = require('http').createServer(function(request, response) {
+var app = require('https').createServer({
+    key : fs.readFileSync(__dirname+'/../ssl/site.key').toString(),
+    cert : fs.readFileSync(__dirname+'/../ssl/final.crt').toString()
+}, function(request, response) {
+    console.log();
     fs.readFile(__dirname+'/../client/index.html', function(err, data) {
         if(err) {
             console.log(__diname);
@@ -8,7 +12,7 @@ var app = require('http').createServer(function(request, response) {
             return response.end('Error loading index.html');
         }
 
-        //response.setHeader('Access-Control-Allow-Origin', "http://"+request.headers.host+':7777');
+        //response.setHeader('Access-Control-Allow-Origin', "https://"+request.headers.host+':7777');
         //response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
         //response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
 
@@ -23,16 +27,7 @@ var app = require('http').createServer(function(request, response) {
 
 
 var io = require('socket.io').listen(app);
-//io.configure('production', function() {});
-//io.set("origins", "*:*");
-//io.set("origins", "*:*");
 io.set('origins', '*:*');
-
-var fs = require('fs');
-
-//app.listen(7777);
-
-
 
 var serverName = '<b style="color:blue">SERVER</b>';
 
