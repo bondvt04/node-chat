@@ -1,3 +1,5 @@
+
+
 var app = require('http').createServer(function(request, response) {
     fs.readFile(__dirname+'/../client/index.html', function(err, data) {
         if(err) {
@@ -15,7 +17,11 @@ var app = require('http').createServer(function(request, response) {
 
         response.end(data);
     });
+}).listen("7777", "192.168.0.141", function(){
+    console.log("Server up and running...");
 });
+
+
 var io = require('socket.io').listen(app);
 //io.configure('production', function() {});
 //io.set("origins", "*:*");
@@ -25,9 +31,7 @@ io.set('origins', '*:*');
 var fs = require('fs');
 
 //app.listen(7777);
-app.listen("7777", "192.168.0.141", function(){
-    console.log("Server up and running...");
-});
+
 
 
 var serverName = '<b style="color:blue">SERVER</b>';
