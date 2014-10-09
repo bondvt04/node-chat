@@ -1,21 +1,52 @@
-var app = require('http').createServer();
+var app = require('http').createServer(function(request, response) {
+    fs.readFile(__dirname+'/../client/index.html', function(err, data) {
+        if(err) {
+            console.log(__diname);
+            response.writeHead(500);
+            return response.end('Error loading index.html');
+        }
+
+        //response.setHeader('Access-Control-Allow-Origin', "http://"+request.headers.host+':7777');
+        //response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+        //response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+
+        //response.writeHead(200, {"Access-Control-Allow-Origin": "*"});
+        response.writeHead(200);
+
+        response.end(data);
+    });
+});
 var io = require('socket.io').listen(app);
+//io.configure('production', function() {});
+//io.set("origins", "*:*");
+//io.set("origins", "*:*");
+io.set('origins', '*:*');
+
 var fs = require('fs');
 
-app.listen(7777);
+//app.listen(7777);
+app.listen("7777", "192.168.0.141", function(){
+    console.log("Server up and running...");
+});
+
+
 var serverName = '<b style="color:blue">SERVER</b>';
 
 io.sockets.on('connection', function(socket) {
     console.log('new user connected...');
 
     socket.on('addme', function(username) {
+        console.log("addme", username);
+
         socket.username = username;
         socket.emit('chat', serverName, 'You have connected');
         socket.broadcast.emit('chat', serverName, username + ' is on deck :)');
     });
 
     socket.on('sendchat', function(data) {
-        socket.emit('chat', socket.username, data);
+        console.log("sendchat", data);
+
+        io.sockets.emit('chat', socket.username, data);
     });
 
     socket.on('disconnect', function() {
@@ -23,5 +54,5 @@ io.sockets.on('connection', function(socket) {
     });
 });
 
-console.log('start server...');
+//console.log('start server...');
 //file:///Users/anatoliybondar/www/node-chat/client/index.html
