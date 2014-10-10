@@ -37,6 +37,7 @@ var app = require('https').createServer({
             }
 
             //response.setHeader('Content-Type', 'text/html');
+            // 
             response.setHeader('Content-Type', mime.lookup(pathname));
             response.statusCode = 200;
 
