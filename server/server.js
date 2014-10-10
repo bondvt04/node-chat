@@ -1,26 +1,72 @@
 var fs = require('fs');
 var colors = require('colors');
+var path = require('path');
+var mime = require('mime');
+
+console.log(__dirname);
 
 var app = require('https').createServer({
     key : fs.readFileSync(__dirname+'/../ssl/site.key').toString(),
     cert : fs.readFileSync(__dirname+'/../ssl/final.crt').toString()
 }, function(request, response) {
-    fs.readFile(__dirname+'/../client/index.html', function(err, data) {
-        if(err) {
-            console.log(__diname);
-            response.writeHead(500);
-            return response.end('Error loading index.html');
+    var pathname = __dirname+"/../"+request.url;
+    console.log("##### ", pathname);
+
+    path.exists(pathname, function(exists) {
+        console.log("===== ", exists);
+        if(!exists) {
+            response.writeHead(404);
+            response.write("Bad request 404\n");
+            response.end();
+            return;
         }
 
-        //response.setHeader('Access-Control-Allow-Origin', "https://"+request.headers.host+':7777');
-        //response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-        //response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+        fs.stat(pathname, function(err, stats) {
+            if(err) {
+                response.writeHead(404);
+                response.write("Bad request 404\n");
+                response.end();
+                return;
+            }
 
-        //response.writeHead(200, {"Access-Control-Allow-Origin": "*"});
-        response.writeHead(200);
+            if(!stats.isFile()) {
+                response.writeHead(403);
+                response.write("Directory access is forbidden\n");
+                response.end();
+                return;
+            }
 
-        response.end(data);
+            //response.setHeader('Content-Type', 'text/html');
+            response.setHeader('Content-Type', mime.lookup(pathname));
+            response.statusCode = 200;
+
+            var file = fs.createReadStream(pathname);
+            file.on("open", function() {
+                file.pipe(response);
+            });
+            file.on("error", function(err) {
+                console.error(err);
+            });
+        });
     });
+
+
+    //fs.readFile(__dirname+'/../client/index.html', function(err, data) {
+    //    if(err) {
+    //        console.log(__diname);
+    //        response.writeHead(500);
+    //        return response.end('Error loading index.html');
+    //    }
+    //
+    //    //response.setHeader('Access-Control-Allow-Origin', "https://"+request.headers.host+':7777');
+    //    //response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    //    //response.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+    //
+    //    //response.writeHead(200, {"Access-Control-Allow-Origin": "*"});
+    //    response.writeHead(200);
+    //
+    //    response.end(data);
+    //});
 })
 
 try {
